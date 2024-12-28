@@ -1,4 +1,5 @@
 import Contact from '../db/models/contacts.js';
+import mongoose from 'mongoose';
 
 export const getAllContacts = async () => {
     try {
@@ -18,4 +19,57 @@ export const getContactById = async (contactId) => {
         console.log(error);
         throw new Error('Failed to retrieve contact');
     }
+};
+
+export const createContact = async ({
+    name,
+    phoneNumber,
+    email,
+    isFavourite,
+    contactType,
+}) => {
+    try {
+        const newContact = new Contact({
+            name,
+            phoneNumber,
+            email,
+            isFavourite,
+            contactType,
+        });
+
+        await newContact.save();
+        return newContact;
+    } catch (error) {
+        console.error(error);
+
+        throw new Error('Error creating contact');
+    }
+};
+
+export const updateContact = async (contactId, updatedData) => {
+    try {
+        const updatedContact = await Contact.findByIdAndUpdate(
+            contactId,
+            updatedData,
+            {
+                new: true,
+                runValidators: true,
+            },
+        );
+
+        return updatedContact;
+    } catch (error) {
+        console.error('Error updating contact:', error);
+        throw new Error('Error updating contact');
+    }
+};
+
+export const deleteContact = async (contactId) => {
+    if (!mongoose.Types.ObjectId.isValid(contactId)) {
+        throw new Error('Invalid contact ID');
+    }
+
+    const contact = await Contact.findByIdAndDelete(contactId);
+
+    return contact;
 };
