@@ -20,26 +20,14 @@ export const getAllContactsController = async (req, res, next) => {
             perPage = 10,
             sortBy = 'name',
             sortOrder = 'asc',
-            type,
-            isFavourite,
         } = req.query;
-
-        if (page < 1 || perPage < 1) {
-            throw createHttpError(400, 'Page and perPage must be positive integers');
-        }
-
-        if (!['asc', 'desc'].includes(sortOrder)) {
-            throw createHttpError(400, 'Invalid sortOrder. Use "asc" or "desc"');
-        }
-
-        const filters = { type, isFavourite };
-
         const { contacts, totalItems } = await getAllContacts(
             parseInt(page, 10),
             parseInt(perPage, 10),
             sortBy,
             sortOrder,
-            filters,
+            {},
+            req.user._id,
         );
 
         const totalPages = Math.ceil(totalItems / perPage);
@@ -62,19 +50,24 @@ export const getAllContactsController = async (req, res, next) => {
     }
 };
 
-export const getContactByIdController = async (req, res) => {
+export const getContactByIdController = async (req, res, next) => {
     const { contactId } = req.params;
-    const contact = await getContactById(contactId);
 
-    if (!contact) {
-        throw createHttpError(404, 'Contact not found');
+    try {
+        const contact = await getContactById(contactId, req.user._id);
+
+        if (!contact) {
+            throw createHttpError(404, 'Contact not found');
+        }
+
+        res.status(200).json({
+            status: 200,
+            message: `The contact with id ${contactId} is found successfully!`,
+            data: contact,
+        });
+    } catch (error) {
+        next(error);
     }
-
-    res.status(200).json({
-        status: 200,
-        message: `The contact with id ${contactId} is found successfully!`,
-        data: contact,
-    });
 };
 
 export const createContactController = async (req, res) => {
@@ -84,7 +77,10 @@ export const createContactController = async (req, res) => {
         throw createHttpError(400, error.details[0].message);
     }
 
-    const newContact = await createContact(req.body);
+    const newContact = await createContact({
+        ...req.body,
+        userId: req.user._id,
+    });
 
     res.status(201).json({
         status: 201,
@@ -111,10 +107,14 @@ export const updateContactController = async (req, res, next) => {
             throw createHttpError(400, 'Invalid contact ID');
         }
 
-        const updatedContact = await updateContact(contactId, updatedData);
+        const updatedContact = await updateContact(
+            contactId,
+            updatedData,
+            req.user._id,
+        );
 
         if (!updatedContact) {
-            throw createHttpError(404, 'Contact not found');
+            throw createHttpError(404, 'Contact not found or not owned by user');
         }
 
         res.status(200).json({
@@ -131,11 +131,7 @@ export const deleteContactController = async (req, res, next) => {
     const { contactId } = req.params;
 
     try {
-        if (!mongoose.Types.ObjectId.isValid(contactId)) {
-            throw createHttpError(400, 'Invalid contact ID');
-        }
-
-        const contact = await deleteContact(contactId);
+        const contact = await deleteContact(contactId, req.user._id);
 
         if (!contact) {
             throw createHttpError(404, 'Contact not found');
