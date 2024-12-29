@@ -1,13 +1,33 @@
 import Contact from '../db/models/contacts.js';
+import { buildFilters } from '../utils/buildFilters.js';
+
 import mongoose from 'mongoose';
 
-export const getAllContacts = async () => {
+export const getAllContacts = async (
+    page = 1,
+    perPage = 10,
+    sortBy = 'name',
+    sortOrder = 'asc',
+    filters = {},
+) => {
     try {
-        const contacts = await Contact.find();
-        return contacts;
+        const skip = page > 0 ? (page - 1) * perPage : 0;
+        const sortDirection = sortOrder === 'desc' ? -1 : 1;
+
+        const filterConditions = buildFilters(filters);
+
+        const [contacts, totalItems] = await Promise.all([
+            Contact.find(filterConditions)
+                .sort({ [sortBy]: sortDirection })
+                .skip(skip)
+                .limit(perPage),
+            Contact.countDocuments(filterConditions),
+        ]);
+
+        return { contacts, totalItems };
     } catch (error) {
-        console.log(error);
-        throw new Error('Failed to retrieve contacts');
+        console.error(error);
+        throw new Error('Error retrieving contacts');
     }
 };
 
@@ -16,8 +36,8 @@ export const getContactById = async (contactId) => {
         const contact = await Contact.findById(contactId);
         return contact;
     } catch (error) {
-        console.log(error);
-        throw new Error('Failed to retrieve contact');
+        console.error(error);
+        throw new Error('Error retrieving contact by ID');
     }
 };
 
