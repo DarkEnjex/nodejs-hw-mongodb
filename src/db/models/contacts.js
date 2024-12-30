@@ -37,12 +37,16 @@ const contactSchema = new mongoose.Schema(
             ref: 'User',
             required: true,
         },
+        photo: {
+            type: String,
+            default: null,
+        },
     },
     {
         timestamps: true,
     },
 );
 
-const Contact = mongoose.model('contacts', contactSchema);
+const Contact = mongoose.model('Contact', contactSchema);
 
 export default Contact;
