@@ -52,7 +52,7 @@ export const loginController = async (req, res, next) => {
                 maxAge: 24 * 60 * 60 * 1000,
             })
             .json({
-                status: '200',
+                status: 200,
                 message: 'Successfully logged in an user!',
                 data: { accessToken },
             });
@@ -80,7 +80,7 @@ export const refreshController = async (req, res, next) => {
                 maxAge: 24 * 60 * 60 * 1000,
             })
             .json({
-                status: '200',
+                status: 200,
                 message: 'Successfully refreshed a session!',
                 data: { accessToken },
             });
