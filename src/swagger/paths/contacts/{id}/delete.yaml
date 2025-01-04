@@ -1,0 +1,25 @@
+tags:
+  - Contacts
+summary: Delete a contact
+operationId: deleteContact
+description: Remove a specific contact by its unique ID.
+security:
+  - BearerAuth: []
+parameters:
+  - name: contactId
+    in: path
+    required: true
+    description: The unique identifier of the contact to delete.
+    schema:
+      type: string
+      format: uuid
+responses:
+  '204':
+    description: Contact deleted successfully.
+  '404':
+    $ref: '../../../components/responses/notFoundError.yaml'
+  '401':
+    $ref: '../../../components/responses/unAuthorizedError.yaml'
+
+  '500':
+    description: Internal server error.

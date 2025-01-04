@@ -22,6 +22,7 @@ export const getAllContactsController = async (req, res, next) => {
             sortBy = 'name',
             sortOrder = 'asc',
         } = req.query;
+
         const { contacts, totalItems } = await getAllContacts(
             parseInt(page, 10),
             parseInt(perPage, 10),
@@ -52,9 +53,8 @@ export const getAllContactsController = async (req, res, next) => {
 };
 
 export const getContactByIdController = async (req, res, next) => {
-    const { contactId } = req.params;
-
     try {
+        const { contactId } = req.params;
         const contact = await getContactById(contactId, req.user._id);
 
         if (!contact) {
@@ -70,6 +70,7 @@ export const getContactByIdController = async (req, res, next) => {
         next(error);
     }
 };
+
 export const createContactController = async (req, res, next) => {
     try {
         const { error } = createContactSchema.validate(req.body);
@@ -105,12 +106,17 @@ export const updateContactController = async (req, res, next) => {
     try {
         const { contactId } = req.params;
 
+        const contact = await getContactById(contactId, req.user._id);
+        if (!contact) {
+            throw createHttpError(404, 'Contact not found');
+        }
+
         const { error } = updateContactSchema.validate(req.body);
         if (error) {
             throw createHttpError(400, error.details[0].message);
         }
 
-        let photoUrl = undefined;
+        let photoUrl;
         if (req.file) {
             const base64Image = `data:${req.file.mimetype
                 };base64,${req.file.buffer.toString('base64')}`;
@@ -118,20 +124,11 @@ export const updateContactController = async (req, res, next) => {
             photoUrl = uploadResult;
         }
 
-        const updatedData = { ...req.body };
-        if (photoUrl) {
-            updatedData.photo = photoUrl;
-        }
-
         const updatedContact = await updateContact(
             contactId,
-            updatedData,
+            { ...req.body, ...(photoUrl && { photo: photoUrl }) },
             req.user._id,
         );
-
-        if (!updatedContact) {
-            throw createHttpError(404, 'Contact not found or not owned by user');
-        }
 
         res.status(200).json({
             status: 200,
@@ -144,16 +141,17 @@ export const updateContactController = async (req, res, next) => {
 };
 
 export const deleteContactController = async (req, res, next) => {
-    const { contactId } = req.params;
-
     try {
-        const contact = await deleteContact(contactId, req.user._id);
+        const { contactId } = req.params;
 
-        if (!contact) {
+        const deletedContact = await deleteContact(contactId, req.user._id);
+        if (!deletedContact) {
             throw createHttpError(404, 'Contact not found');
         }
 
-        res.status(204).send();
+        res.status(204).json({
+            status: 204,
+        });
     } catch (error) {
         next(error);
     }
