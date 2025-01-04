@@ -1,13 +1,11 @@
 openapi: 3.1.0
 info:
   version: 1.0.0
-  title: Contact Book
+  title: 'Contact Book'
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  description:
-    A contact book program with the ability to create personal contacts.
-    Includes registration to set up contacts for users.
+  description: 'A contact book program with the ability to create personal contacts. Includes registration to set up contacts for users.'
 tags:
   - name: Contacts
     description: Endpoints for managing contacts.
