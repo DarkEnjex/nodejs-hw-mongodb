@@ -129,7 +129,7 @@ paths:
               required:
                 - name
                 - phoneNumber
-                -email
+                - email
                 - contactType
               properties:
                 name:
