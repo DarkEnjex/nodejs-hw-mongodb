@@ -8,7 +8,7 @@ paths:
         description: Contact data to add.
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '../src/swagger/components/schemas/contact.yaml'
       responses:

@@ -44,3 +44,4 @@ required:
   - name
   - phoneNumber
   - contactType
+  - email

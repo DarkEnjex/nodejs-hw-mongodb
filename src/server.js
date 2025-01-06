@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
@@ -17,13 +19,20 @@ const setupServer = async () => {
         const app = express();
         const PORT = process.env.PORT || 3000;
 
-        const __dirname = path
-            .dirname(new URL(import.meta.url).pathname)
-            .replace(/^\/([A-Za-z]:)/, '$1');
+        const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, '$1');
 
-        const swaggerDocument = YAML.load(
-            path.resolve(__dirname, '..', 'docs', 'openapi.yaml'),
-        );
+        const yamlPath = path.resolve(__dirname, '..', 'docs', 'openapi.yaml');
+        console.log('Looking for YAML file at:', path.normalize(yamlPath)); // Нормалізуємо шлях
+
+        if (!fs.existsSync(yamlPath)) {
+            console.error(`swaggerDocument file not found at ${yamlPath}`);
+            process.exit(1); // Завершуємо процес, якщо файл не знайдено
+        }
+
+        // Завантажуємо YAML
+        const swaggerDocument = YAML.load(yamlPath);
+        console.log('Swagger Document loaded:', swaggerDocument);
+
 
         app.use(cors());
         app.use(express.json());
