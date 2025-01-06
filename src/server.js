@@ -22,16 +22,16 @@ const setupServer = async () => {
         const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, '$1');
 
         const yamlPath = path.resolve(__dirname, '..', 'docs', 'openapi.yaml');
-        console.log('Looking for YAML file at:', path.normalize(yamlPath)); // Нормалізуємо шлях
+        // console.log('Looking for YAML file at:', path.normalize(yamlPath)); // Нормалізуємо шлях
 
-        if (!fs.existsSync(yamlPath)) {
-            console.error(`swaggerDocument file not found at ${yamlPath}`);
-            process.exit(1); // Завершуємо процес, якщо файл не знайдено
-        }
+        // if (!fs.existsSync(yamlPath)) {
+        //     console.error(`swaggerDocument file not found at ${yamlPath}`);
+        //     process.exit(1); // Завершуємо процес, якщо файл не знайдено
+        // }
 
         // Завантажуємо YAML
         const swaggerDocument = YAML.load(yamlPath);
-        console.log('Swagger Document loaded:', swaggerDocument);
+        // console.log('Swagger Document loaded:', swaggerDocument);
 
 
         app.use(cors());
